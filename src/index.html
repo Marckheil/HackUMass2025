@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOAPify - Testing Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .section h2 {
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-size: 1.25rem;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #475569;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        button.secondary {
+            background: #64748b;
+        }
+        
+        button.danger {
+            background: #ef4444;
+        }
+        
+        button.success {
+            background: #10b981;
+        }
+        
+        .recording {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .status {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        
+        .note-list {
+            margin-top: 15px;
+        }
+        
+        .note-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .note-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        
+        .note-item h3 {
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        
+        .note-item .date {
+            color: #64748b;
+            font-size: 12px;
+        }
+        
+        .soap-display {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .soap-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .soap-section:last-child {
+            border-bottom: none;
+        }
+        
+        .soap-section h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .soap-section p {
+            color: #475569;
+            line-height: 1.6;
+        }
+        
+        .config-section {
+            background: #fff9e6;
+            border-left-color: #f59e0b;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 SOAPify Testing Interface</h1>
+        <p class="subtitle">Test your backend API before building the frontend</p>
+        
+        <!-- Configuration -->
+        <div class="section config-section">
+            <h2>⚙️ Configuration</h2>
+            <div class="form-group">
+                <label>Backend API URL:</label>
+                <input type="text" id="apiUrl" value="http://localhost:3001" placeholder="http://localhost:3001">
+            </div>
+            <button onclick="testConnection()">Test Connection</button>
+            <div id="connectionStatus"></div>
+        </div>
+        
+        <!-- User Management -->
+        <div class="section">
+            <h2>👤 User Management</h2>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="userEmail" placeholder="doctor@example.com">
+            </div>
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" id="userName" placeholder="Dr. Smith">
+            </div>
+            <button onclick="createUser()">Create/Login User</button>
+            <div id="userStatus"></div>
+            <div id="userInfo" style="margin-top: 10px;"></div>
+        </div>
+        
+        <!-- Audio Recording -->
+        <div class="section">
+            <h2>🎤 Audio Recording & Processing</h2>
+            <p style="margin-bottom: 15px; color: #64748b;">Record a clinical note and get it transcribed & converted to SOAP format</p>
+            <button id="recordBtn" onclick="toggleRecording()" class="success">Start Recording</button>
+            <button onclick="uploadAudio()" id="uploadBtn" style="display:none;">Upload & Process</button>
+            <div id="recordingStatus"></div>
+            <audio id="audioPlayback" controls style="width: 100%; margin-top: 15px; display: none;"></audio>
+        </div>
+        
+        <!-- Text Input -->
+        <div class="section">
+            <h2>📝 Text Input (No Audio)</h2>
+            <div class="form-group">
+                <label>Clinical Note:</label>
+                <textarea id="textInput" placeholder="Enter clinical note text here..."></textarea>
+            </div>
+            <button onclick="processText()">Process Text to SOAP</button>
+            <div id="textStatus"></div>
+        </div>
+        
+        <!-- Notes List -->
+        <div class="section">
+            <h2>📋 Your Notes</h2>
+            <button onclick="loadNotes()">Refresh Notes</button>
+            <button onclick="loadNotes(true)" class="secondary">Load with Search</button>
+            <div id="notesList" class="note-list"></div>
+        </div>
+        
+        <!-- Selected Note Display -->
+        <div class="section" id="selectedNoteSection" style="display: none;">
+            <h2>📄 Note Details</h2>
+            <div id="noteDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordedBlob = null;
+        
+        function getApiUrl() {
+            return document.getElementById('apiUrl').value;
+        }
+        
+        function showStatus(elementId, message, type = 'info') {
+            const el = document.getElementById(elementId);
+            el.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        async function testConnection() {
+            try {
+                showStatus('connectionStatus', 'Testing connection...', 'info');
+                const response = await fetch(`${getApiUrl()}/api/status`);
+                const data = await response.json();
+                showStatus('connectionStatus', `✅ Connected! Services: DB: ${data.services.database}, OpenAI: ${data.services.openai}, Supabase: ${data.services.supabase}`, 'success');
+            } catch (error) {
+                showStatus('connectionStatus', `❌ Connection failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function createUser() {
+            const email = document.getElementById('userEmail').value;
+            const name = document.getElementById('userName').value;
+            
+            if (!email) {
+                showStatus('userStatus', '❌ Email is required', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('userStatus', 'Creating/logging in user...', 'info');
+                const response = await fetch(`${getApiUrl()}/api/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, name })
+                });
+                
+                const user = await response.json();
+                currentUser = user;
+                showStatus('userStatus', `✅ Logged in as ${user.email}`, 'success');
+                document.getElementById('userInfo').innerHTML = `
+                    <div style="padding: 10px; background: white; border-radius: 6px; margin-top: 10px;">
+                        <strong>User ID:</strong> ${user.id}<br>
+                        <strong>Email:</strong> ${user.email}<br>
+                        <strong>Name:</strong> ${user.name || 'Not set'}
+                    </div>
+                `;
+                
+                // Auto-load notes
+                loadNotes();
+            } catch (error) {
+                showStatus('userStatus', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function toggleRecording() {
+            const btn = document.getElementById('recordBtn');
+            
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            audioChunks.push(event.data);
+                        }
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const audioUrl = URL.createObjectURL(recordedBlob);
+                        const audio = document.getElementById('audioPlayback');
+                        audio.src = audioUrl;
+                        audio.style.display = 'block';
+                        document.getElementById('uploadBtn').style.display = 'inline-block';
+                        btn.textContent = 'Start Recording';
+                        btn.classList.remove('danger', 'recording');
+                        btn.classList.add('success');
+                    };
+                    
+                    mediaRecorder.start();
+                    btn.textContent = '⏹️ Stop Recording';
+                    btn.classList.remove('success');
+                    btn.classList.add('danger', 'recording');
+                    showStatus('recordingStatus', '🎙️ Recording in progress...', 'info');
+                } catch (error) {
+                    showStatus('recordingStatus', `❌ Microphone access denied: ${error.message}`, 'error');
+                }
+            } else {
+                // Stop recording
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                showStatus('recordingStatus', '✅ Recording stopped. Click Upload to process.', 'success');
+            }
+        }
+        
+        async function uploadAudio() {
+            if (!currentUser) {
+                showStatus('recordingStatus', '❌ Please login first', 'error');
+                return;
+            }
+            
+            if (!recordedBlob) {
+                showStatus('recordingStatus', '❌ No recording available', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('recordingStatus', '<span class="spinner"></span>Processing audio... (transcription → SOAP generation)', 'info');
+                
+                const formData = new FormData();
+                formData.append('audio', recordedBlob, 'recording.webm');
+                formData.append('userId', currentUser.id);
+                
+                const response = await fetch(`${getApiUrl()}/api/notes/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('recordingStatus', '✅ SOAP note created successfully!', 'success');
+                    displayNote(result.note);
+                    loadNotes(); // Refresh list
+                    
+                    // Reset
+                    recordedBlob = null;
+                    document.getElementById('audioPlayback').style.display = 'none';
+                    document.getElementById('uploadBtn').style.display = 'none';
+                } else {
+                    showStatus('recordingStatus', `❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus('recordingStatus', `❌ Upload failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function processText() {
+            if (!currentUser) {
+                showStatus('textStatus', '❌ Please login first', 'error');
+                return;
+            }
+            
+            const text = document.getElementById('textInput').value;
+            if (!text) {
+                showStatus('textStatus', '❌ Please enter some text', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('textStatus', '<span class="spinner"></span>Processing text...', 'info');
+                
+                const response = await fetch(`${getApiUrl()}/api/notes/text`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: currentUser.id,
+                        text: text
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('textStatus', '✅ SOAP note created!', 'success');
+                    displayNote(result.note);
+                    loadNotes();
+                    document.getElementById('textInput').value = '';
+                } else {
+                    showStatus('textStatus', `❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus('textStatus', `❌ Processing failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function loadNotes(withSearch = false) {
+            if (!currentUser) {
+                document.getElementById('notesList').innerHTML = '<p style="color: #64748b;">Please login first</p>';
+                return;
+            }
+            
+            try {
+                let url = `${getApiUrl()}/api/notes/user/${currentUser.id}?limit=20`;
+                
+                if (withSearch) {
+                    const searchTerm = prompt('Enter search term:');
+                    if (searchTerm) {
+                        url += `&search=${encodeURIComponent(searchTerm)}`;
+                    }
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                const notesList = document.getElementById('notesList');
+                
+                if (data.notes.length === 0) {
+                    notesList.innerHTML = '<p style="color: #64748b;">No notes found</p>';
+                    return;
+                }
+                
+                notesList.innerHTML = data.notes.map(note => `
+                    <div class="note-item" onclick='displayNote(${JSON.stringify(note)})'>
+                        <h3>${note.title || 'Untitled Note'}</h3>
+                        <p class="date">${new Date(note.createdAt).toLocaleString()}</p>
+                    </div>
+                `).join('');
+                
+                if (data.pagination) {
+                    notesList.innerHTML += `<p style="margin-top: 10px; color: #64748b;">Showing ${data.notes.length} of ${data.pagination.total} notes</p>`;
+                }
+            } catch (error) {
+                document.getElementById('notesList').innerHTML = `<div class="status error">Failed to load notes: ${error.message}</div>`;
+            }
+        }
+        
+        function displayNote(note) {
+            const section = document.getElementById('selectedNoteSection');
+            const details = document.getElementById('noteDetails');
+            
+            section.style.display = 'block';
+            
+            details.innerHTML = `
+                <h3 style="margin-bottom: 15px;">${note.title || 'Untitled Note'}</h3>
+                <p style="color: #64748b; margin-bottom: 15px;">Created: ${new Date(note.createdAt).toLocaleString()}</p>
+                
+                ${note.audioUrl ? `
+                    <div style="margin-bottom: 20px;">
+                        <audio controls src="${note.audioUrl}" style="width: 100%;"></audio>
+                    </div>
+                ` : ''}
+                
+                <div class="soap-display">
+                    <div class="soap-section">
+                        <h4>S - Subjective</h4>
+                        <p>${note.subjective || '<em>No data</em>'}</p>
+                    </div>
+                    
+                    <div class="soap-section">
+                        <h4>O - Objective</h4>
+                        <p>${note.objective || '<em>No data</em>'}</p>
+                    </div>
+                    
+                    <div class="soap-section">
+                        <h4>A - Assessment</h4>
+                        <p>${note.assessment || '<em>No data</em>'}</p>
+                    </div>
+                    
+                    <div class="soap-section">
+                        <h4>P - Plan</h4>
+                        <p>${note.plan || '<em>No data</em>'}</p>
+                    </div>
+                    
+                    ${note.rawInput ? `
+                        <details style="margin-top: 20px;">
+                            <summary style="cursor: pointer; font-weight: 600;">View Raw Transcript</summary>
+                            <p style="margin-top: 10px; padding: 10px; background: #f8fafc; border-radius: 6px;">${note.rawInput}</p>
+                        </details>
+                    ` : ''}
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button onclick="deleteNote('${note.id}')" class="danger">Delete Note</button>
+                </div>
+            `;
+            
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        async function deleteNote(noteId) {
+            if (!confirm('Are you sure you want to delete this note?')) return;
+            
+            try {
+                await fetch(`${getApiUrl()}/api/notes/${noteId}`, {
+                    method: 'DELETE'
+                });
+                
+                alert('Note deleted!');
+                document.getElementById('selectedNoteSection').style.display = 'none';
+                loadNotes();
+            } catch (error) {
+                alert(`Failed to delete: ${error.message}`);
+            }
+        }
+        
+        // Test connection on load
+        window.addEventListener('load', () => {
+            testConnection();
+        });
+    </script>
+</body>
+</html>
